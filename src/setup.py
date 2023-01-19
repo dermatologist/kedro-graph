@@ -29,7 +29,7 @@ setup(
             "sphinx_rtd_theme==0.5.1",
             "nbsphinx==0.8.1",
             "nbstripout~=0.4",
-            "sphinx-autodoc-typehints==1.11.1",
+            "sphinx-autodoc-typehints==1.21.4",
             "sphinx_copybutton==0.3.1",
             "ipykernel>=5.3, <7.0",
             "Jinja2<3.1.0",
