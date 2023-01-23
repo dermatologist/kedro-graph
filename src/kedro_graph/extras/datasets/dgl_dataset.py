@@ -54,6 +54,7 @@ class DglDataset(AbstractVersionedDataSet):
             load_args: Extra arguments to pass to DGL's ``
             save_args: Extra arguments to pass to DGL's ``
         """
+
         _fs_args = deepcopy(fs_args) or {}
         _save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
         _save_args.update(save_args or {})
@@ -67,6 +68,13 @@ class DglDataset(AbstractVersionedDataSet):
         self._filepath = PurePosixPath(path)
         self._load_args = deepcopy(load_args) or {}
         self._save_args = _save_args
+        if self._filepath:
+            super().__init__(
+                filepath=PurePosixPath(path),
+                version=version,
+                exists_function=self._fs.exists,
+                glob_function=self._fs.glob,
+            )
 
     def _describe(self) -> Dict[str, Any]:
         return dict(

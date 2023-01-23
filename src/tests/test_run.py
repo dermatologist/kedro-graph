@@ -18,6 +18,8 @@ from kedro.framework.context import KedroContext
 from kedro.framework.hooks import _create_hook_manager
 
 from kedro_graph.extras.datasets.dgl_dataset import DglDataset
+import torch as th
+
 
 @pytest.fixture
 def config_loader():
@@ -41,5 +43,12 @@ class TestProjectContext:
     # def test_project_path(self, project_context):
     #     assert project_context.project_path == Path.cwd()
     def test_dgl_dataset(self, project_context):
-        path = "data/01_raw/graph-dataset.dgl"
+        path = "data/01_raw/graph-dataset"
         dgl_dataset = DglDataset(path)
+        import dgl
+        g1 = dgl.graph(([0, 1, 2], [1, 2, 3]))
+        g2 = dgl.graph(([0, 2], [2, 3]))
+        g2.edata["e"] = th.ones(2, 4)
+        labels = th.tensor([0, 1])
+        data = ([g1,g2], labels, 3)
+        dgl_dataset.save(data)
