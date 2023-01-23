@@ -20,7 +20,8 @@ from kedro.io.core import (
 
 import fsspec
 
-class DglDataset(AbstractVersionedDataSet):
+
+class DglDataset(AbstractVersionedDataSet, dgl.data.DGLDataset):  # ! Different from dgl.data import DGLDataset
     """``DglDataset`` loads and saves DGL graphs. It uses fsspec to handle
     the underlying filesystem operations.
     """
