@@ -2,3 +2,6 @@
 #
 # Documentation for this file format can be found in "The Data Catalog"
 # Link: https://kedro.readthedocs.io/en/stable/data/data_catalog.html
+dgl_dataset:
+  type: kedro_graph.extras.dataset.dgl_dataset.DglDataset
+  filepath: data/01_raw/dataset
