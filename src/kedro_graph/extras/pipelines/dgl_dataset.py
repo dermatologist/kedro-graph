@@ -29,9 +29,6 @@ class DglDataset(AbstractVersionedDataSet):
     def __init__(
         self,
         filepath: str,
-        graph: dgl.DGLGraph,
-        labels: list,
-        num_classes: int,
         version: Version = None,
         credentials: Dict[str, Any] = None,
         fs_args: Dict[str, Any] = None,
@@ -56,9 +53,6 @@ class DglDataset(AbstractVersionedDataSet):
             load_args: Extra arguments to pass to DGL's ``
             save_args: Extra arguments to pass to DGL's ``
         """
-        self._graph = graph
-        self._labels = labels
-        self._num_classes = num_classes
         _fs_args = deepcopy(fs_args) or {}
         _save_args = deepcopy(self.DEFAULT_SAVE_ARGS)
         _save_args.update(save_args or {})
@@ -82,27 +76,27 @@ class DglDataset(AbstractVersionedDataSet):
             save_args=self._save_args,
         )
 
-    def _load(self) -> dgl.DGLGraph:
-        load_path = str(self._get_load_path())
-        if self._protocol != "file":
-            # file:// protocol seems to misbehave on Windows
-            # (<urlopen error file not on local host>),
-            # so we don't join that back to the filepath;
-            # storage_options also don't work with local paths
-            load_path = f"{self._protocol}{PROTOCOL_DELIMITER}{load_path}"
+    def _load(self):
+        load_path = get_filepath_str(self._get_load_path(), self._protocol)
         logging.info("Loading DGL graph from %s", load_path)
+        with self._fs.open(load_path + '_dgl_graph.bin', **self._fs_open_args_load) as fs_file:
+            graphs, labels_dict = load_graphs(fs_file, **self._load_args)
+        with self._fs.open(load_path + '_info.pkl', **self._fs_open_args_load) as fs_file:
+            info = load_info(fs_file)
+        return (graphs, labels_dict['labels'], info['num_classes'])
 
 
-        with self._fs.open(load_path, **self._fs_args["open_args_load"]) as fs_file:
-            return dgl.load_graphs(fs_file, **self._load_args)[0][0]
-
-    def _save(self, data: dgl.DGLGraph) -> None:
+    def _save(self, data) -> None:
+        (graphs, labels, num_classes) = data
         save_path = get_filepath_str(self._get_save_path(), self._protocol)
         logging.info("Saving DGL graph to %s", save_path)
-        # TODO Support for GCS
-        save_graphs(save_path, self._graphs, {'labels': self._labels})
-        info_path = save_path.split('.')[0] + '.pkl'
-        save_info(info_path, {'num_classes': self._num_classes})
+        save_graphs(save_path + '_dgl_graph.bin', graphs, {'labels': labels})
+        save_info(save_path + '_info.pkl', {'num_classes': num_classes})
+
+    def has_cache(self):
+        # check whether there are processed data in `self.save_path`
+        save_path = get_filepath_str(self._get_save_path(), self._protocol)
+        return os.path.exists(save_path + '_dgl_graph.bin') and os.path.exists(save_path + '_info.pkl')
 
     def _exists(self) -> bool:
         load_path = get_filepath_str(self._get_load_path(), self._protocol)
