@@ -11,3 +11,4 @@ pytest-mock
 pytest~=6.2
 dgl
 dglgo
+torch
