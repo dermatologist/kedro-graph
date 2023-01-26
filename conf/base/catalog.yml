@@ -18,10 +18,12 @@ image_data:
 
 image_model:
   type: kedro_tf_image.extras.datasets.tf_model_download.TfModelDownload
-  model_url: "https://tfhub.dev/tensorflow/resnet_50/classification/1"
+  model_url: "https://tfhub.dev/google/tf2-preview/mobilenet_v2/feature_vector/2"
   load_args: {
-      "trainable": False,
-      "dim": [None, 224, 224, 3]
+      "trainable": True,
+      "height": 224,
+      "width": 224,
+      "channels": 3
   }
 
 tabular_data:
