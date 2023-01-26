@@ -3,7 +3,7 @@
 # Documentation for this file format can be found in "The Data Catalog"
 # Link: https://kedro.readthedocs.io/en/stable/data/data_catalog.html
 dgl_dataset:
-  type: kedro_graph.extras.dataset.dgl_dataset.DglDataset
+  type: kedro_graph.extras.datasets.dgl_dataset.DglDataset
   filepath: data/01_raw/dataset
 
 image_data:
@@ -17,7 +17,7 @@ image_data:
   filename_suffix: ".jpg"
 
 image_model:
-  type: kedro_tf_image.extras.dataset.tf_model_download.TfModelDownload
+  type: kedro_tf_image.extras.datasets.tf_model_download.TfModelDownload
   model_url: "https://tfhub.dev/tensorflow/resnet_50/classification/1"
   load_args: {
       "trainable": False,

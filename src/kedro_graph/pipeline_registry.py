@@ -4,6 +4,7 @@ from typing import Dict
 from kedro.framework.project import find_pipelines
 from kedro.pipeline import Pipeline
 
+from kedro_tf_utils.pipelines.embedding.pipeline import create_embedding_pipeline
 
 def register_pipelines() -> Dict[str, Pipeline]:
     """Register the project's pipelines.
@@ -13,4 +14,5 @@ def register_pipelines() -> Dict[str, Pipeline]:
     """
     pipelines = find_pipelines()
     pipelines["__default__"] = sum(pipelines.values())
+    pipelines["embedding"] = create_embedding_pipeline()
     return pipelines
