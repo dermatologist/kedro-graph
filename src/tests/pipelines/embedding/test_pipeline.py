@@ -19,7 +19,7 @@ from kedro.io import PartitionedDataSet
 from kedro.extras.datasets.pickle import PickleDataSet
 from kedro_tf_utils.pipelines.train.nodes import train_multimodal
 
-from kedro_graph.pipelines.embedding.nodes import create_knn
+from kedro_graph.pipelines.embedding.nodes import create_knn, create_graph
 
 
 @pytest.fixture
@@ -52,3 +52,17 @@ class TestEmbeddingPipeline:
 
         knn = create_knn(_image_embedding, _tabular_embedding, conf_params['embedding'])
         assert knn is not None
+
+    def test_create_graph(self, project_context):
+        image_embedding = PickleDataSet(
+            filepath="data/04_feature/image-embedding.pkl")
+        tabular_embedding = PickleDataSet(
+            filepath="data/04_feature/tabular-embedding.pkl")
+
+        _image_embedding = image_embedding.load()
+        _tabular_embedding = tabular_embedding.load()
+
+        conf_params = project_context.config_loader.get('**/embedding.yml')
+
+        graph = create_graph(_image_embedding, _tabular_embedding, conf_params['embedding'])
+        assert graph is not None

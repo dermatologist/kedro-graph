@@ -22,13 +22,42 @@ from sklearn.neighbors import KDTree
 import logging
 
 logger = logging.getLogger(__name__)
-# def create_graph(embedding, graph=None, **kwargs):
-#     node_labels = torch.from_numpy(
-#         embedding['name'].astype('category').cat.codes.to_numpy())
-#     if graph is None:
-#         graph = dgl.graph((edges_src, edges_dst), num_nodes=nodes_data.shape[0])
-#     graph["embedding"] = embedding
-#     return graph
+
+TEMP_TREE = {}
+
+def create_graph(*args):
+    # ! remove this
+    create_knn(*args)
+    global TEMP_TREE
+    tree = TEMP_TREE['tree']
+    embeddings = TEMP_TREE['embeddings']
+
+
+    for arg in args:
+        # All embeddings have the following keys: ['embedding', 'nodes', 'y', 'name', 'type', 'parameters']
+        if ('embedding' in arg):
+            logging.info(f"Creating graph for {arg['name']}")
+            num_nodes = len(arg['embedding'])
+            node_labels = arg['nodes']
+            print(num_nodes, node_labels)
+            for idx, node_features in enumerate(arg['embedding']):
+                pass
+        else:
+            logging.info(f"Processing properties dict")
+
+    # processing weights
+    Src = []
+    Dst = []
+    Weight = []
+    for idx in range(num_nodes):
+        dist, indices = tree.query(embeddings[idx:idx+1, :], k=3)
+        for dist, ind in zip(dist[0], indices[0]):
+            if (dist > 0):
+                Src.append(idx)
+                Dst.append(ind)
+                Weight.append(dist)
+                print(f"Distance between {idx} and {ind} is {dist}")
+    return tree
 
 def create_knn(*args):
     embeddings = []
@@ -40,7 +69,11 @@ def create_knn(*args):
         else:
             logging.info(f"Processing properties dict")
     embeddings = np.concatenate(embeddings, axis=1)
-    # print (embeddings.shape) # 4 * (128 * 2)
+    # * Embedding shape is (n_samples, n_modality * n_features)
     tree = KDTree(embeddings, leaf_size=2, metric='euclidean')
-    print(tree)
+    global TEMP_TREE
+    TEMP_TREE = {
+        'tree': tree,
+        'embeddings': embeddings
+    }
     return tree
