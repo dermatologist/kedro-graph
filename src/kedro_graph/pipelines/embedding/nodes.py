@@ -15,13 +15,18 @@
 """
 import dgl
 from dgl.data import DGLDataset
-import torch
+# import torch
 import os
 
-def create_graph(embedding, graph=None, **kwargs):
-    node_labels = torch.from_numpy(
-        embedding['name'].astype('category').cat.codes.to_numpy())
-    if graph is None:
-        graph = dgl.graph((edges_src, edges_dst), num_nodes=nodes_data.shape[0])
-    graph["embedding"] = embedding
-    return graph
+# def create_graph(embedding, graph=None, **kwargs):
+#     node_labels = torch.from_numpy(
+#         embedding['name'].astype('category').cat.codes.to_numpy())
+#     if graph is None:
+#         graph = dgl.graph((edges_src, edges_dst), num_nodes=nodes_data.shape[0])
+#     graph["embedding"] = embedding
+#     return graph
+
+def create_knn(*args):
+    for arg in args:
+        if arg is None:
+            return None
