@@ -17,7 +17,9 @@ import dgl
 from dgl.data import DGLDataset
 # import torch
 import os
+import logging
 
+logger = logging.getLogger(__name__)
 # def create_graph(embedding, graph=None, **kwargs):
 #     node_labels = torch.from_numpy(
 #         embedding['name'].astype('category').cat.codes.to_numpy())
@@ -28,5 +30,10 @@ import os
 
 def create_knn(*args):
     for arg in args:
-        if arg is None:
-            return None
+        # All embeddings have the following keys: ['embedding', 'nodes', 'y', 'name', 'type', 'parameters']
+        if ('embedding' in arg):
+            logging.info(f"Creating KNN graph for {arg['name']}")
+            print(arg['name'])
+        else:
+            logging.info(f"Processing properties dict")
+    return args
