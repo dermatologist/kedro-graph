@@ -17,6 +17,8 @@ from kedro.config import ConfigLoader
 from kedro.framework.context import KedroContext
 from kedro.framework.hooks import _create_hook_manager
 
+from kedro_graph.extras.datasets.dgl_dataset import DglDataset
+
 
 @pytest.fixture
 def config_loader():
@@ -37,5 +39,15 @@ def project_context(config_loader):
 # and should be replaced with the ones testing the project
 # functionality
 class TestProjectContext:
-    def test_project_path(self, project_context):
-        assert project_context.project_path == Path.cwd()
+    # def test_project_path(self, project_context):
+    #     assert project_context.project_path == Path.cwd()
+    def test_dgl_dataset(self, project_context):
+        path = "data/01_raw/graph-dataset"
+        dgl_dataset = DglDataset(path)
+        from dgl.data import KarateClubDataset
+        dataset = KarateClubDataset()
+        num_classes = dataset.num_classes
+        g = dataset[0]
+        labels = g.ndata['label']
+        data = (g, labels, num_classes)
+        dgl_dataset.save(data)

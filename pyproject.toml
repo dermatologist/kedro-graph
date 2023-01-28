@@ -1,3 +1,7 @@
+[project]
+name = "kedro_graph"
+version = "0.1.0"
+
 [tool.kedro]
 package_name = "kedro_graph"
 project_name = "Kedro Graph"
