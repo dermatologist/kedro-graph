@@ -17,6 +17,8 @@ import dgl
 from dgl.data import DGLDataset
 # import torch
 import os
+import numpy as np
+from sklearn.neighbors import KDTree
 import logging
 
 logger = logging.getLogger(__name__)
@@ -29,11 +31,16 @@ logger = logging.getLogger(__name__)
 #     return graph
 
 def create_knn(*args):
+    embeddings = []
     for arg in args:
         # All embeddings have the following keys: ['embedding', 'nodes', 'y', 'name', 'type', 'parameters']
         if ('embedding' in arg):
             logging.info(f"Creating KNN graph for {arg['name']}")
-            print(arg['name'])
+            embeddings.append(arg['embedding'])
         else:
             logging.info(f"Processing properties dict")
-    return args
+    embeddings = np.concatenate(embeddings, axis=1)
+    # print (embeddings.shape) # 4 * (128 * 2)
+    tree = KDTree(embeddings, leaf_size=2, metric='euclidean')
+    print(tree)
+    return tree
