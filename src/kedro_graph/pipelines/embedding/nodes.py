@@ -24,8 +24,6 @@ import tensorflow as tf
 
 logger = logging.getLogger(__name__)
 
-TEMP_TREE = {}
-
 def create_graph(*args):
     # ! remove this
     kdt = create_knn(*args)
@@ -39,6 +37,8 @@ def create_graph(*args):
             logging.info(f"Processing parameters dict")
             parameters = arg
 
+    BACKEND = parameters.get('BACKEND', 'tensorflow')
+
     for arg in args:
         # All embeddings have the following keys: ['embedding', 'nodes', 'y', 'name', 'type', 'parameters']
         if ('embedding' in arg):
@@ -48,15 +48,26 @@ def create_graph(*args):
             if (len(arg['nodes']) != num_nodes):
                 raise ValueError("Node size mismatch")
             # TODO: Support for pytorch backend
-            graph.ndata[arg['name']] = tf.convert_to_tensor(arg['embedding'])
+            if (BACKEND != 'pytorch'):
+                graph.ndata[arg['name']] = tf.convert_to_tensor(arg['embedding'])
+            else:
+                #graph.ndata[arg['name']] = torch.tensor(arg['embedding'])
+                raise NotImplementedError("Pytorch backend not implemented")
             if (arg['y'] is not None):
                 y = arg['y']
 
 
     # TODO: Support for pytorch backend
-    graph.ndata['label'] = tf.convert_to_tensor(node_labels)
-    graph.ndata['y'] = tf.convert_to_tensor(y)
-    graph.edata['weight'] = tf.convert_to_tensor(kdt['Weight'])
+    if (BACKEND != 'pytorch'):
+        graph.ndata['label'] = tf.convert_to_tensor(node_labels)
+        graph.ndata['y'] = tf.convert_to_tensor(y)
+        graph.edata['weight'] = tf.convert_to_tensor(kdt['Weight'])
+    else:
+        #graph.ndata['label'] = torch.tensor(node_labels)
+        #graph.ndata['y'] = torch.tensor(y)
+        #graph.edata['weight'] = torch.tensor(kdt['Weight'])
+        raise NotImplementedError("Pytorch backend not implemented")
+
     return graph
 
 def create_knn(*args):
@@ -70,16 +81,17 @@ def create_knn(*args):
             if (len(arg['embedding']) != num_nodes):
                 raise ValueError("Embedding size mismatch")
         else:
-            logging.info(f"Processing properties dict")
+            logging.info(f"Processing parameters dict")
+            parameters = arg
     embeddings = np.concatenate(embeddings, axis=1)
     # * Embedding shape is (n_samples, n_modality * n_features)
-    tree = KDTree(embeddings, leaf_size=2, metric='euclidean')
+    tree = KDTree(embeddings, leaf_size=parameters['LEAF_SIZE'], metric=parameters['METRIC'])
     # processing weights
     Src = []
     Dst = []
     Weight = []
     for idx in range(num_nodes):
-        dist, indices = tree.query(embeddings[idx:idx+1, :], k=3)
+        dist, indices = tree.query(embeddings[idx:idx+1, :], k=parameters['NEIGHBOURS'])
         for dist, ind in zip(dist[0], indices[0]):
             if (dist > 0):
                 Src.append(idx)
