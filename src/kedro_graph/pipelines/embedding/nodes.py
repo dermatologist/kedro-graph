@@ -20,7 +20,6 @@ import os
 import numpy as np
 from sklearn.neighbors import KDTree
 import logging
-import tensorflow as tf
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +37,10 @@ def create_graph(*args):
             parameters = arg
 
     BACKEND = parameters.get('BACKEND', 'tensorflow')
+    if (BACKEND != 'pytorch'):
+        import tensorflow as tf
+    else:
+        import torch
 
     for arg in args:
         # All embeddings have the following keys: ['embedding', 'nodes', 'y', 'name', 'type', 'parameters']
@@ -47,26 +50,23 @@ def create_graph(*args):
                 raise ValueError("Embedding size mismatch")
             if (len(arg['nodes']) != num_nodes):
                 raise ValueError("Node size mismatch")
-            # TODO: Support for pytorch backend
             if (BACKEND != 'pytorch'):
                 graph.ndata[arg['name']] = tf.convert_to_tensor(arg['embedding'])
             else:
-                #graph.ndata[arg['name']] = torch.tensor(arg['embedding'])
-                raise NotImplementedError("Pytorch backend not implemented")
+                graph.ndata[arg['name']] = torch.tensor(arg['embedding'])
+
             if (arg['y'] is not None):
                 y = arg['y']
 
 
-    # TODO: Support for pytorch backend
     if (BACKEND != 'pytorch'):
         graph.ndata['label'] = tf.convert_to_tensor(node_labels)
         graph.ndata['y'] = tf.convert_to_tensor(y)
         graph.edata['weight'] = tf.convert_to_tensor(kdt['Weight'])
     else:
-        #graph.ndata['label'] = torch.tensor(node_labels)
-        #graph.ndata['y'] = torch.tensor(y)
-        #graph.edata['weight'] = torch.tensor(kdt['Weight'])
-        raise NotImplementedError("Pytorch backend not implemented")
+        graph.ndata['label'] = torch.tensor(node_labels)
+        graph.ndata['y'] = torch.tensor(y)
+        graph.edata['weight'] = torch.tensor(kdt['Weight'])
 
     MASK = parameters.get('MASK', False)
     TRAIN = parameters.get('TRAIN', 0.6)
@@ -78,13 +78,12 @@ def create_graph(*args):
         n_train = int(n_nodes * TRAIN)
         n_val = int(n_nodes * VAL)
         if (BACKEND == 'pytorch'):
-            # train_mask = torch.zeros(n_nodes, dtype=torch.bool)
-            # val_mask = torch.zeros(n_nodes, dtype=torch.bool)
-            # test_mask = torch.zeros(n_nodes, dtype=torch.bool)
+            train_mask = torch.zeros(n_nodes, dtype=torch.bool)
+            val_mask = torch.zeros(n_nodes, dtype=torch.bool)
+            test_mask = torch.zeros(n_nodes, dtype=torch.bool)
             train_mask[:n_train] = True
             val_mask[n_train:n_train + n_val] = True
             test_mask[n_train + n_val:] = True
-            raise NotImplementedError("Pytorch backend not implemented")
         else:
             train_mask = tf.zeros(n_nodes, dtype=tf.bool)
             val_mask = tf.zeros(n_nodes, dtype=tf.bool)
@@ -92,11 +91,9 @@ def create_graph(*args):
             train_mask = tf.concat([tf.ones(n_train, dtype=tf.bool), tf.zeros(n_nodes - n_train, dtype=tf.bool)], axis=0)
             val_mask = tf.concat([tf.zeros(n_train, dtype=tf.bool), tf.ones(n_val, dtype=tf.bool), tf.zeros(n_nodes - n_train - n_val, dtype=tf.bool)], axis=0)
             test_mask = tf.concat([tf.zeros(n_train + n_val, dtype=tf.bool), tf.ones(n_nodes - n_train - n_val, dtype=tf.bool)], axis=0)
-
         graph.ndata['train_mask'] = train_mask
         graph.ndata['val_mask'] = val_mask
         graph.ndata['test_mask'] = test_mask
-
 
     return graph
 
