@@ -24,23 +24,26 @@ import logging
 logger = logging.getLogger(__name__)
 
 def create_graph(*args):
-    # ! remove this
-    kdt = create_knn(*args)
-
-    num_nodes = len(args[0]['embedding'])
-    node_labels = args[0]['nodes']
-    graph = dgl.graph((kdt['Src'], kdt['Dst']), num_nodes=num_nodes)
-
+    """
+    Create a graph from the embeddings
+    """
+    parameters = {}
     for arg in args:
         if ('embedding' not in arg):
             logging.info(f"Processing parameters dict")
             parameters = arg
-
+    WEIGHTS = parameters.get('WEIGHTS', 'knn')
+    if (WEIGHTS == 'knn'):
+        knn = create_knn(*args)
     BACKEND = parameters.get('BACKEND', 'tensorflow')
     if (BACKEND != 'pytorch'):
         import tensorflow as tf
     else:
         import torch
+
+    num_nodes = len(args[0]['embedding'])
+    node_labels = args[0]['nodes']
+    graph = dgl.graph((knn['Src'], knn['Dst']), num_nodes=num_nodes)
 
     for arg in args:
         # All embeddings have the following keys: ['embedding', 'nodes', 'y', 'name', 'type', 'parameters']
@@ -62,11 +65,11 @@ def create_graph(*args):
     if (BACKEND != 'pytorch'):
         graph.ndata['label'] = tf.convert_to_tensor(node_labels)
         graph.ndata['y'] = tf.convert_to_tensor(y)
-        graph.edata['weight'] = tf.convert_to_tensor(kdt['Weight'])
+        graph.edata['weight'] = tf.convert_to_tensor(knn['Weight'])
     else:
         graph.ndata['label'] = torch.tensor(node_labels)
         graph.ndata['y'] = torch.tensor(y)
-        graph.edata['weight'] = torch.tensor(kdt['Weight'])
+        graph.edata['weight'] = torch.tensor(knn['Weight'])
 
     MASK = parameters.get('MASK', False)
     TRAIN = parameters.get('TRAIN', 0.6)
@@ -124,11 +127,11 @@ def create_knn(*args):
                 Src.append(idx)
                 Dst.append(ind)
                 Weight.append(dist)
-    kdt = {
+    knn = {
         'kd-tree': tree,
         'embeddings': embeddings,
         'Src': Src,
         'Dst': Dst,
         'Weight': Weight
     }
-    return kdt
+    return knn
