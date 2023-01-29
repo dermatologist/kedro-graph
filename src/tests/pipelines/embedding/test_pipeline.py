@@ -65,4 +65,5 @@ class TestEmbeddingPipeline:
         conf_params = project_context.config_loader.get('**/embedding.yml')
 
         graph = create_graph(_image_embedding, _tabular_embedding, conf_params['embedding'])
+        print(graph)
         assert graph is not None

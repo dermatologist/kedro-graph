@@ -20,6 +20,7 @@ import os
 import numpy as np
 from sklearn.neighbors import KDTree
 import logging
+import tensorflow as tf
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +32,13 @@ def create_graph(*args):
 
     num_nodes = len(args[0]['embedding'])
     node_labels = args[0]['nodes']
+    graph = dgl.graph((kdt['Src'], kdt['Dst']), num_nodes=num_nodes)
+
+    for arg in args:
+        if ('embedding' not in arg):
+            logging.info(f"Processing parameters dict")
+            parameters = arg
+
     for arg in args:
         # All embeddings have the following keys: ['embedding', 'nodes', 'y', 'name', 'type', 'parameters']
         if ('embedding' in arg):
@@ -39,13 +47,17 @@ def create_graph(*args):
                 raise ValueError("Embedding size mismatch")
             if (len(arg['nodes']) != num_nodes):
                 raise ValueError("Node size mismatch")
-            for idx, node_features in enumerate(arg['embedding']):
-                pass
-        else:
-            logging.info(f"Processing properties dict")
+            # TODO: Support for pytorch backend
+            graph.ndata[arg['name']] = tf.convert_to_tensor(arg['embedding'])
+            if (arg['y'] is not None):
+                y = arg['y']
 
 
-    return kdt
+    # TODO: Support for pytorch backend
+    graph.ndata['label'] = tf.convert_to_tensor(node_labels)
+    graph.ndata['y'] = tf.convert_to_tensor(y)
+    graph.edata['weight'] = tf.convert_to_tensor(kdt['Weight'])
+    return graph
 
 def create_knn(*args):
     num_nodes = len(args[0]['embedding'])
