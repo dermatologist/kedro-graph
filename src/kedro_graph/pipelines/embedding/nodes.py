@@ -68,6 +68,36 @@ def create_graph(*args):
         #graph.edata['weight'] = torch.tensor(kdt['Weight'])
         raise NotImplementedError("Pytorch backend not implemented")
 
+    MASK = parameters.get('MASK', False)
+    TRAIN = parameters.get('TRAIN', 0.6)
+    VAL = parameters.get('VAL', 0.2)
+    if (MASK):
+        # If your dataset is a node classification dataset, you will need to assign
+        # masks indicating whether a node belongs to training, validation, and test set.
+        n_nodes = num_nodes
+        n_train = int(n_nodes * TRAIN)
+        n_val = int(n_nodes * VAL)
+        if (BACKEND == 'pytorch'):
+            # train_mask = torch.zeros(n_nodes, dtype=torch.bool)
+            # val_mask = torch.zeros(n_nodes, dtype=torch.bool)
+            # test_mask = torch.zeros(n_nodes, dtype=torch.bool)
+            train_mask[:n_train] = True
+            val_mask[n_train:n_train + n_val] = True
+            test_mask[n_train + n_val:] = True
+            raise NotImplementedError("Pytorch backend not implemented")
+        else:
+            train_mask = tf.zeros(n_nodes, dtype=tf.bool)
+            val_mask = tf.zeros(n_nodes, dtype=tf.bool)
+            test_mask = tf.zeros(n_nodes, dtype=tf.bool)
+            train_mask = tf.concat([tf.ones(n_train, dtype=tf.bool), tf.zeros(n_nodes - n_train, dtype=tf.bool)], axis=0)
+            val_mask = tf.concat([tf.zeros(n_train, dtype=tf.bool), tf.ones(n_val, dtype=tf.bool), tf.zeros(n_nodes - n_train - n_val, dtype=tf.bool)], axis=0)
+            test_mask = tf.concat([tf.zeros(n_train + n_val, dtype=tf.bool), tf.ones(n_nodes - n_train - n_val, dtype=tf.bool)], axis=0)
+
+        graph.ndata['train_mask'] = train_mask
+        graph.ndata['val_mask'] = val_mask
+        graph.ndata['test_mask'] = test_mask
+
+
     return graph
 
 def create_knn(*args):

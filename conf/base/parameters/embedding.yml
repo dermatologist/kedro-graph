@@ -15,6 +15,7 @@ embedding:
   METRIC: euclidean
   NEIGHBOURS: 3
   BACKEND: tensorflow
+  MASK: True
 tabular:
   ID_FIELD: name
   TARGET: dm # The header of the dependant variable
