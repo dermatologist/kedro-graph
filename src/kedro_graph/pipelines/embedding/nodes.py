@@ -27,24 +27,41 @@ TEMP_TREE = {}
 
 def create_graph(*args):
     # ! remove this
-    create_knn(*args)
-    global TEMP_TREE
-    tree = TEMP_TREE['tree']
-    embeddings = TEMP_TREE['embeddings']
+    kdt = create_knn(*args)
 
-
+    num_nodes = len(args[0]['embedding'])
+    node_labels = args[0]['nodes']
     for arg in args:
         # All embeddings have the following keys: ['embedding', 'nodes', 'y', 'name', 'type', 'parameters']
         if ('embedding' in arg):
             logging.info(f"Creating graph for {arg['name']}")
-            num_nodes = len(arg['embedding'])
-            node_labels = arg['nodes']
-            print(num_nodes, node_labels)
+            if (len(arg['embedding']) != num_nodes):
+                raise ValueError("Embedding size mismatch")
+            if (len(arg['nodes']) != num_nodes):
+                raise ValueError("Node size mismatch")
             for idx, node_features in enumerate(arg['embedding']):
                 pass
         else:
             logging.info(f"Processing properties dict")
 
+
+    return kdt
+
+def create_knn(*args):
+    num_nodes = len(args[0]['embedding'])
+    embeddings = []
+    for arg in args:
+        # All embeddings have the following keys: ['embedding', 'nodes', 'y', 'name', 'type', 'parameters']
+        if ('embedding' in arg):
+            logging.info(f"Creating KNN graph for {arg['name']}")
+            embeddings.append(arg['embedding'])
+            if (len(arg['embedding']) != num_nodes):
+                raise ValueError("Embedding size mismatch")
+        else:
+            logging.info(f"Processing properties dict")
+    embeddings = np.concatenate(embeddings, axis=1)
+    # * Embedding shape is (n_samples, n_modality * n_features)
+    tree = KDTree(embeddings, leaf_size=2, metric='euclidean')
     # processing weights
     Src = []
     Dst = []
@@ -56,24 +73,11 @@ def create_graph(*args):
                 Src.append(idx)
                 Dst.append(ind)
                 Weight.append(dist)
-                print(f"Distance between {idx} and {ind} is {dist}")
-    return tree
-
-def create_knn(*args):
-    embeddings = []
-    for arg in args:
-        # All embeddings have the following keys: ['embedding', 'nodes', 'y', 'name', 'type', 'parameters']
-        if ('embedding' in arg):
-            logging.info(f"Creating KNN graph for {arg['name']}")
-            embeddings.append(arg['embedding'])
-        else:
-            logging.info(f"Processing properties dict")
-    embeddings = np.concatenate(embeddings, axis=1)
-    # * Embedding shape is (n_samples, n_modality * n_features)
-    tree = KDTree(embeddings, leaf_size=2, metric='euclidean')
-    global TEMP_TREE
-    TEMP_TREE = {
-        'tree': tree,
-        'embeddings': embeddings
+    kdt = {
+        'kd-tree': tree,
+        'embeddings': embeddings,
+        'Src': Src,
+        'Dst': Dst,
+        'Weight': Weight
     }
-    return tree
+    return kdt
