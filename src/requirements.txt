@@ -12,5 +12,6 @@ pytest~=6.2
 dgl
 dglgo
 torch
+tensorflow
 kedro_tf_text @ git+https://github.com/dermatologist/kedro-tf-text.git@develop
 kedro_tf_image @ git+https://github.com/dermatologist/kedro-tf-image.git@develop
