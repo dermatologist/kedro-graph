@@ -30,6 +30,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r src/requirements.lock
+        python -m dgl.backend.set_default_backend tensorflow
     - name: Test with pytest
       run: |
         pytest
