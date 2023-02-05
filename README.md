@@ -1,5 +1,8 @@
 # Kedro Graph
 
+Kedro module for creating [DGL](https://www.dgl.ai/) graph from [multimodal](https://github.com/dermatologist/kedro-multimodal) data. Embeddings are generated using [kedro-tf-utils](https://github.com/dermatologist/kedro-tf-utils) for tabular, BERT, unstructured text and image data. 
+
+[![kedro-graph](https://github.com/dermatologist/kedro-graph/blob/develop/notes/graph.drawio.svg)](https://github.com/dermatologist/kedro-graph/blob/develop/notes/graph.drawio.svg)
 ## Overview
 
 This is your new Kedro project, which was generated using `Kedro 0.18.4`.

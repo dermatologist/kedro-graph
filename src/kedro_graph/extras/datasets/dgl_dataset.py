@@ -121,3 +121,8 @@ class DglDataset(AbstractVersionedDataSet, dgl.data.DGLDataset):  # ! Different 
         filepath = get_filepath_str(self._filepath, self._protocol)
         self._fs.invalidate_cache(filepath)
 
+    def __getitem__(self, i):
+        return self.graph
+
+    def __len__(self):
+        return 1

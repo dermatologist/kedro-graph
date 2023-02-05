@@ -11,6 +11,11 @@ embedding:
   TARGET: dm
   DROP: ["name", "id"]
   EMBEDDING_DIM: 128
+  LEAF_SIZE: 2
+  METRIC: euclidean
+  NEIGHBOURS: 3
+  BACKEND: tensorflow
+  MASK: True
 tabular:
   ID_FIELD: name
   TARGET: dm # The header of the dependant variable
