@@ -33,9 +33,9 @@ class TestEmbeddingPipeline:
 
     def test_create_knn(self, project_context):
         image_embedding = PickleDataSet(
-            filepath="data/04_feature/image-embedding.pkl")
+            filepath="data/04_feature/test-image-embedding.pkl")
         tabular_embedding = PickleDataSet(
-            filepath="data/04_feature/tabular-embedding.pkl")
+            filepath="data/04_feature/test-tabular-embedding.pkl")
 
         _image_embedding = image_embedding.load()
         _tabular_embedding = tabular_embedding.load()
@@ -47,9 +47,9 @@ class TestEmbeddingPipeline:
 
     def test_create_graph(self, project_context):
         image_embedding = PickleDataSet(
-            filepath="data/04_feature/image-embedding.pkl")
+            filepath="data/04_feature/test-image-embedding.pkl")
         tabular_embedding = PickleDataSet(
-            filepath="data/04_feature/tabular-embedding.pkl")
+            filepath="data/04_feature/test-tabular-embedding.pkl")
 
         _image_embedding = image_embedding.load()
         _tabular_embedding = tabular_embedding.load()
