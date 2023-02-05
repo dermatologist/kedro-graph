@@ -21,9 +21,9 @@ logs/**
 !.gitkeep
 
 # also keep the example dataset
-!data/01_raw/iris.csv
-
-
+!data/01_raw/test*.csv
+!data/01_raw/imageset/*.jpg
+!data/04_feature/test*.pkl
 ##########################
 # Common files
 

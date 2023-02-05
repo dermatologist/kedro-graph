@@ -36,8 +36,8 @@ tabular_model:
 
 image_embedding:
   type: pickle.PickleDataSet
-  filepath: data/04_feature/image-embedding.pkl
+  filepath: data/04_feature/test-image-embedding.pkl
 
 tabular_embedding:
   type: pickle.PickleDataSet
-  filepath: data/04_feature/tabular-embedding.pkl
+  filepath: data/04_feature/test-tabular-embedding.pkl
