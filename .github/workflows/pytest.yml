@@ -32,4 +32,4 @@ jobs:
         pip install -r src/requirements.lock
     - name: Test with pytest
       run: |
-        kedro test
+        pytest
