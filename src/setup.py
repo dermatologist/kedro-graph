@@ -30,7 +30,7 @@ setup(
             "nbsphinx==0.8.1",
             "nbstripout~=0.4",
             "sphinx-autodoc-typehints==1.11.1",
-            "sphinx_copybutton==0.3.1",
+            "sphinx_copybutton==0.5.2",
             "ipykernel>=5.3, <7.0",
             "Jinja2<3.1.0",
             "myst-parser~=0.17.2",
